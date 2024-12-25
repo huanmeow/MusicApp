@@ -40,6 +40,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> with SingleTickerProvid
     _audioPlayerManager = AudioPlayerManager(songUrl: widget.playingSong.source);
     _audioPlayerManager.init();
   }
+
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     const delta = 64;
@@ -124,6 +125,13 @@ class _NowPlayingPageState extends State<NowPlayingPage> with SingleTickerProvid
         )
       )
     );
+  }
+  @override
+  void dispose(){
+    _audioPlayerManager.dispose();
+
+    super.dispose();
+
   }
   Widget _mediaButtons(){
     return SizedBox(

@@ -19,7 +19,9 @@ class AudioPlayerManager{
       player.setUrl(songUrl);
 
   }
-
+    void dispose(){
+    player.dispose();
+    }
 }
 class DurationState{
   const DurationState ({
