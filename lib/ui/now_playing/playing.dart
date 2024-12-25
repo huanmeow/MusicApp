@@ -30,15 +30,19 @@ class NowPlayingPage extends StatefulWidget {
 class _NowPlayingPageState extends State<NowPlayingPage> with SingleTickerProviderStateMixin {
   late AnimationController _imageAnimController;
   late AudioPlayerManager _audioPlayerManager;
+  late int _selectedItemIndex;
+  late Song _song;
   @override
   void initState(){
     super.initState();
+    _song= widget.playingSong;
     _imageAnimController = AnimationController(vsync: this, duration: const Duration(milliseconds: 12000),
 
 
     );
-    _audioPlayerManager = AudioPlayerManager(songUrl: widget.playingSong.source);
+    _audioPlayerManager = AudioPlayerManager(songUrl: _song.source);
     _audioPlayerManager.init();
+    _selectedItemIndex = widget.songs.indexOf(widget.playingSong);
   }
 
   Widget build(BuildContext context) {
@@ -138,9 +142,9 @@ class _NowPlayingPageState extends State<NowPlayingPage> with SingleTickerProvid
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
            const MediaButtonControl(function: null, icon: Icons.shuffle, color: Colors.deepPurple, size: 24),
-            const  MediaButtonControl(function: null, icon: Icons.skip_previous, color: Colors.deepPurple, size: 36),
+              MediaButtonControl(function: _setPrevSong, icon: Icons.skip_previous, color: Colors.deepPurple, size: 36),
             _playButton(),
-            const  MediaButtonControl(function: null, icon: Icons.skip_next, color: Colors.deepPurple, size: 36),
+              MediaButtonControl(function: _setNextSong, icon: Icons.skip_next, color: Colors.deepPurple, size: 36),
             const   MediaButtonControl(function: null, icon: Icons.repeat, color: Colors.deepPurple, size: 24),
           ],
 
@@ -154,9 +158,24 @@ class _NowPlayingPageState extends State<NowPlayingPage> with SingleTickerProvid
         builder: (context, snapshot){
           final durationState = snapshot.data;
           final progress = durationState?.progress ?? Duration.zero;
+          final buffered = durationState?.progress ?? Duration.zero;
           final total = durationState?.total ?? Duration.zero;
-          return ProgressBar(progress: progress,
+
+          return ProgressBar(
+
+            progress: progress,
+
             total: total,
+            buffered: buffered,
+            onSeek: _audioPlayerManager.player.seek,
+            barHeight: 5.0,
+            barCapShape: BarCapShape.round,
+            baseBarColor: Colors.grey,
+            progressBarColor: Colors.red,
+            bufferedBarColor: Colors.grey,
+            thumbColor: Colors.deepPurple,
+            thumbGlowColor: Colors.green,
+            thumbRadius: 10.0,
           );
         });
   }
@@ -206,7 +225,27 @@ class _NowPlayingPageState extends State<NowPlayingPage> with SingleTickerProvid
 
     );
   }
+  void _setNextSong(){
+    ++_selectedItemIndex;
+    final nextSong = widget.songs[_selectedItemIndex];
+    _audioPlayerManager.updateSongUrl(nextSong.source);
+    setState(() {
+      _song= nextSong;
+    });
+
+  }
+  void _setPrevSong(){
+    --_selectedItemIndex;
+    final nextSong = widget.songs[_selectedItemIndex];
+    _audioPlayerManager.updateSongUrl(nextSong.source);
+    setState(() {
+      _song= nextSong;
+    });
+
+
+  }
 }
+
 class MediaButtonControl extends StatefulWidget {
   const MediaButtonControl ({
     super.key,
