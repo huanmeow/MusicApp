@@ -68,7 +68,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> with SingleTickerProvid
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(widget.playingSong.album)
+              Text(_song.album)
               ,const SizedBox(height: 16,),
               const Text('_ ___ _'),
               const SizedBox(height: 48,
@@ -78,7 +78,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> with SingleTickerProvid
                 borderRadius: BorderRadius.circular(radius),
                 child: FadeInImage.assetNetwork(
                   placeholder: "assets/itunes.jpg",
-                  image: widget.playingSong.image,
+                  image: _song.image,
                   width: screenWidth - delta,
                   height: screenWidth - delta,
                   imageErrorBuilder: (context, error, stackTrace){
@@ -97,12 +97,12 @@ class _NowPlayingPageState extends State<NowPlayingPage> with SingleTickerProvid
                   ),
                   Column(
                     children: [
-                      Text(widget.playingSong.title,
+                      Text(_song.title,
                         style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                             color: Theme.of(context).textTheme.bodyMedium!.color),
                       ),
                      const SizedBox(height: 8),
-                      Text(widget.playingSong.artist,
+                      Text(_song.artist,
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                         color: Theme.of(context).textTheme.bodyMedium!.color),
                       ),
