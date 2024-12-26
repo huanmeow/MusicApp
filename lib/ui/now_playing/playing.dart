@@ -36,6 +36,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> with SingleTickerProvid
   late Song _song;
   late double _currentAnimationPosition;
   bool _isShuffle =false;
+  late LoopMode _loopMode;
 
   @override
   void initState(){
@@ -46,9 +47,17 @@ class _NowPlayingPageState extends State<NowPlayingPage> with SingleTickerProvid
 
 
     );
-    _audioPlayerManager = AudioPlayerManager(songUrl: _song.source);
-    _audioPlayerManager.init();
+    _audioPlayerManager = AudioPlayerManager();
+   if (_audioPlayerManager.songUrl.compareTo(_song.source)!=0){
+     _audioPlayerManager.updateSongUrl(_song.source);
+     _audioPlayerManager.prepare(isNewSong: true);
+   }
+   else {
+     _audioPlayerManager.prepare(isNewSong: false);
+
+   }
     _selectedItemIndex = widget.songs.indexOf(widget.playingSong);
+    _loopMode = LoopMode.off;
   }
 
   Widget build(BuildContext context) {
@@ -138,7 +147,6 @@ class _NowPlayingPageState extends State<NowPlayingPage> with SingleTickerProvid
   }
   @override
   void dispose(){
-    _audioPlayerManager.dispose();
 _imageAnimController.dispose();
     super.dispose();
 
@@ -157,7 +165,7 @@ _imageAnimController.dispose();
                   size: 36),
             _playButton(),
               MediaButtonControl(function: _setNextSong, icon: Icons.skip_next, color: Colors.deepPurple, size: 36),
-               MediaButtonControl(function: null, icon: Icons.repeat, color: Colors.deepPurple, size: 24),
+               MediaButtonControl(function: _setRepeatOption, icon: _repeatingIcon(), color: _getRepeatingIconColor(), size: 24),
           ],
 
       ),
@@ -270,9 +278,13 @@ _imageAnimController.dispose();
 
       _selectedItemIndex= random.nextInt(widget.songs.length-1);
     }
-    else{
+    else if (_selectedItemIndex < widget.songs.length-1){
 
       ++_selectedItemIndex;
+    }
+    else if (_loopMode == LoopMode.all && _selectedItemIndex == widget.songs.length-1){
+      _selectedItemIndex =0;
+
     }
     if(_selectedItemIndex >= widget.songs.length){
       _selectedItemIndex= _selectedItemIndex % widget.songs.length;
@@ -292,20 +304,53 @@ _imageAnimController.dispose();
 
       _selectedItemIndex= random.nextInt(widget.songs.length-1);
     }
-    else{
+    else if (_selectedItemIndex>0){
 
       --_selectedItemIndex;
+    }
+    else if (_loopMode == LoopMode.all && _selectedItemIndex==0){
+      _selectedItemIndex= widget.songs.length-1;
+
     }
     if(_selectedItemIndex <0 ){
       _selectedItemIndex= (-1* _selectedItemIndex) % widget.songs.length;
 
     }
+
     final nextSong = widget.songs[_selectedItemIndex];
     _audioPlayerManager.updateSongUrl(nextSong.source);
     setState(() {
       _song= nextSong;
     });
 
+
+  }
+   void _setRepeatOption(){
+    if (_loopMode == LoopMode.off){
+      _loopMode =LoopMode.one;
+    }
+    else if(_loopMode == LoopMode.one){
+      _loopMode= LoopMode.all;
+    }
+    else {
+      _loopMode = LoopMode.off;
+    }
+    setState(() {
+      _audioPlayerManager.player.setLoopMode(_loopMode);
+    });
+   }
+  IconData _repeatingIcon(){
+
+    return switch(_loopMode){
+      LoopMode.one=>Icons.repeat_one,
+      LoopMode.all=>Icons.repeat_on,
+      _=> Icons.repeat,
+    };
+  }
+  Color? _getRepeatingIconColor(){
+    return _loopMode == LoopMode.off
+        ?Colors.grey
+        : Colors.deepPurple;
 
   }
 }
